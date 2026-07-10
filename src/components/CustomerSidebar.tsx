@@ -30,7 +30,7 @@ export default function CustomerSidebar({
       {/* Tombol Menu Mobile */}
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-4 left-4 z-50 rounded-lg bg-white p-2 shadow-md border md:hidden"
+        className="fixed top-4 left-4 z-[100] rounded-lg bg-white p-2 shadow-md border md:hidden"
       >
         <Menu className="h-6 w-6" />
       </button>
