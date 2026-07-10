@@ -9,7 +9,7 @@ const navItems = [
 
 export default function CustomerSidebar({ userName }: { userName: string }) {
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200">
+    <aside className="hidden md:block fixed left-0 top-0 z-40 h-screen w-64 bg-white border-r border-gray-200">
       <div className="flex h-16 items-center gap-2 border-b px-6">
         <Shirt className="h-8 w-8 text-primary-600" />
         <div>

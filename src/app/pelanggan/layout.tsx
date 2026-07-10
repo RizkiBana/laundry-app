@@ -13,7 +13,7 @@ export default async function CustomerLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <CustomerSidebar userName={session.name} />
-      <main className="ml-64 p-8 min-h-screen">{children}</main>
+      <main className="p-4 md:ml-64 md:p-8 min-h-screen">{children}</main>
     </div>
   );
 }
