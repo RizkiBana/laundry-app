@@ -9,22 +9,32 @@ export default async function StatusPage() {
   if (!session) return null;
 
   const orders = await prisma.order.findMany({
-    where: {
-      status: {
-        notIn: ["SELESAI"],
+  where: {
+    status: {
+      notIn: ["SELESAI"],
+    },
+  },
+  include: {
+    items: {
+      include: {
+        price: true,
       },
     },
-    include: {
-      items: {
-        include: {
-          price: true,
-        },
-      },
-    },
-    orderBy: {
-      updatedAt: "desc",
-    },
-  });
+  },
+  orderBy: {
+    updatedAt: "desc",
+  },
+});
 
-  return <StatusPageClient initialOrders={orders} />;
+// Ubah semua Date menjadi string
+const serializedOrders = orders.map((order) => ({
+  ...order,
+  createdAt: order.createdAt.toISOString(),
+  updatedAt: order.updatedAt.toISOString(),
+  estimasiSelesai: order.estimasiSelesai
+    ? order.estimasiSelesai.toISOString()
+    : null,
+}));
+
+return <StatusPageClient initialOrders={serializedOrders} />;
 }

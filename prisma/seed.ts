@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedPassword = await bcrypt.hash("password123", 10);
+  const hashedPassword = await bcrypt.hash("RizkiGanteng1506", 10);
 
   // Admin
   await prisma.user.upsert({
@@ -14,7 +14,7 @@ async function main() {
       email: "admin@laundry.com",
       password: hashedPassword,
       name: "Administrator",
-      phone: "081234567890",
+      phone: "088296200530",
       role: "ADMIN",
     },
   });
@@ -52,76 +52,9 @@ async function main() {
     }
   }
 
-  // Demo order
-  const reguler = await prisma.laundryPrice.findFirst({
-    where: { name: "Cuci Reguler" },
-  });
-  const express = await prisma.laundryPrice.findFirst({
-    where: { name: "Cuci Express" },
-  });
-
-  if (reguler && express) {
-    const existing = await prisma.order.findFirst({
-      where: { orderNumber: "LND-20260101-0001" },
-    });
-    if (!existing) {
-      await prisma.order.create({
-        data: {
-          orderNumber: "LND-20260101-0001",
-          customerName: "Budi Santoso",
-          customerPhone: "08123456789",
-          customerAddress: "Jl. Merdeka No. 5",
-          totalAmount: 35000 + 24000,
-          status: "DICUCI",
-          paymentStatus: "BELUM_LUNAS",
-          paymentMethod: "TUNAI",
-          notes: "Pisahkan baju putih",
-          estimasiSelesai: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-          items: {
-            create: [
-              {
-                priceId: reguler.id,
-                weight: 5,
-                subtotal: 35000,
-                notes: "5 kg cuci reguler",
-              },
-              {
-                priceId: express.id,
-                weight: 2,
-                subtotal: 24000,
-                notes: "2 kg express",
-              },
-            ],
-          },
-        },
-      });
-
-      await prisma.order.create({
-        data: {
-          orderNumber: "LND-20260101-0002",
-          customerName: "Siti Rahayu",
-          customerPhone: "08987654321",
-          totalAmount: 28000,
-          status: "SIAP_DIAMBIL",
-          paymentStatus: "LUNAS",
-          paymentMethod: "QRIS",
-          items: {
-            create: [
-              {
-                priceId: reguler.id,
-                weight: 4,
-                subtotal: 28000,
-              },
-            ],
-          },
-        },
-      });
-    }
-  }
-
   console.log("\n✅ Seed selesai!");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("  Login Admin    : username=admin, password=password123");
+  console.log("  Login Admin    : username=admin, password=RizkiGanteng1506");
   console.log("  Login Pelanggan: klik tombol [Masuk sebagai Pelanggan]");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 }
