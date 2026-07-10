@@ -10,6 +10,7 @@ export default async function StatusPage() {
 
   const orders = await prisma.order.findMany({
   where: {
+    customerId: session.id,
     status: {
       notIn: ["SELESAI"],
     },
@@ -24,6 +25,7 @@ export default async function StatusPage() {
   orderBy: {
     updatedAt: "desc",
   },
+  take: 20,
 });
 
 // Ubah semua Date menjadi string
