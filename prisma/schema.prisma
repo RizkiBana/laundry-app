@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  PELANGGAN
+}
+
+enum OrderStatus {
+  DITERIMA
+  DICUCI
+  DIKERINGKAN
+  DISETRIKA
+  SIAP_DIAMBIL
+  SELESAI
+}
+
+enum PaymentStatus {
+  BELUM_LUNAS
+  LUNAS
+}
+
+enum PaymentMethod {
+  TUNAI
+  TRANSFER
+  QRIS
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  phone     String?
+  address   String?
+  role      Role     @default(PELANGGAN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LaundryPrice {
+  id          String      @id @default(cuid())
+  name        String
+  price       Float
+  unit        String      @default("kg")
+  description String?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  customerName    String
+  customerPhone   String?
+  customerAddress String?
+  totalAmount     Float         @default(0)
+  status          OrderStatus   @default(DITERIMA)
+  paymentStatus   PaymentStatus @default(BELUM_LUNAS)
+  paymentMethod   PaymentMethod @default(TUNAI)
+  notes           String?
+  estimasiSelesai DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id       String       @id @default(cuid())
+  orderId  String
+  order    Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  priceId  String
+  price    LaundryPrice @relation(fields: [priceId], references: [id])
+  weight   Float
+  subtotal Float
+  notes    String?
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  description String
+  amount      Float
+  category    String   @default("Operasional")
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
