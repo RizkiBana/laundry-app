@@ -3,19 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { generateOrderNumber } from "@/lib/utils";
 
-function roundLaundryWeight(weight: number) {
-  const decimal = weight % 1;
-  const integer = Math.floor(weight);
-
-  if (decimal === 0) {
-    return integer;
-  }
-
-  if (decimal <= 0.5) {
-    return integer + 0.5;
-  }
-
-  return integer + 1;
+function roundLaundryPrice(amount: number) {
+  return Math.round(amount / 500) * 500;
 }
 
 export async function GET(request: NextRequest) {
@@ -94,29 +83,25 @@ export async function POST(request: NextRequest) {
   const orderItems = [];
 
   for (const item of items) {
-    const price = await prisma.laundryPrice.findUnique({
-      where: {
-        id: item.priceId,
-      },
-    });
+  const price = await prisma.laundryPrice.findUnique({
+    where: {
+      id: item.priceId,
+    },
+  });
 
-    if (!price) continue;
+  if (!price) continue;
 
-    // Pembulatan berat laundry
-    // Contoh:
-    // 3.21 => 3.5
-    // 3.57 => 4
-    const roundedWeight = roundLaundryWeight(item.weight);
+  const rawSubtotal = item.weight * price.price;
 
-    const subtotal = roundedWeight * price.price;
+  const subtotal = roundLaundryPrice(rawSubtotal);
 
-    totalAmount += subtotal;
+  totalAmount += subtotal;
 
-    orderItems.push({
-      priceId: item.priceId,
-      weight: item.weight,
-      subtotal,
-      notes: item.notes || null,
+  orderItems.push({
+    priceId: item.priceId,
+    weight: item.weight,
+    subtotal,
+    notes: item.notes || null,
     });
   }
 
