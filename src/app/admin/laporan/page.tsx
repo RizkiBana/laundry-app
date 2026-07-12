@@ -127,7 +127,7 @@ export default async function LaporanPage() {
           totalBelumLunas: belumLunas,
 
           // Tambahan
-          totalTunai: totalTunai._sum.totalAmount || 0,
+          totalTunai: (totalTunai._sum.totalAmount || 0) - totalPengeluaran,
           totalQris: totalQris._sum.totalAmount || 0,
 
           totalPengeluaran,

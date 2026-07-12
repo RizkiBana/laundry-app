@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
     totalLunas: lunas._count,
     totalBelumLunas: belumLunas,
 
-    totalTunai: totalTunai._sum.totalAmount || 0,
+    totalTunai: (totalTunai._sum.totalAmount || 0) - totalPengeluaran,
     totalQris: totalQris._sum.totalAmount || 0,
 
     totalPengeluaran,
