@@ -50,7 +50,7 @@ interface Order {
 
 interface FormItem {
   priceId: string;
-  weight: number | "";
+  weight: string;
   notes: string;
 }
 
@@ -82,8 +82,12 @@ export default function PesananClient({
   const [customerPhone, setCustomerPhone] = useState("");
   const [customerAddress, setCustomerAddress] = useState("");
   const [formItems, setFormItems] = useState<FormItem[]>([
-    { priceId: prices[0]?.id || "", weight: 1, notes: "" },
-  ]);
+  {
+    priceId: prices[0]?.id || "",
+    weight: "1",
+    notes: "",
+  },
+]);
   const [paymentMethod, setPaymentMethod] = useState("TUNAI");
   const [formNotes, setFormNotes] = useState("");
   const [estimasiSelesai, setEstimasiSelesai] = useState("");
@@ -92,7 +96,13 @@ export default function PesananClient({
     setCustomerName("");
     setCustomerPhone("");
     setCustomerAddress("");
-    setFormItems([{ priceId: prices[0]?.id || "", weight: 1, notes: "" }]);
+    setFormItems([
+  {
+    priceId: prices[0]?.id || "",
+    weight: "1",
+    notes: "",
+  },
+]);
     setPaymentMethod("TUNAI");
     setFormNotes("");
     setEstimasiSelesai("");
@@ -113,10 +123,14 @@ export default function PesananClient({
       order.items.length > 0
         ? order.items.map((item) => ({
             priceId: item.priceId,
-            weight: item.weight,
+            weight: item.weight.toString(),
             notes: item.notes || "",
           }))
-        : [{ priceId: prices[0]?.id || "", weight: 1, notes: "" }]
+        : [{
+  priceId: prices[0]?.id || "",
+  weight: "1",
+  notes: "",
+}]
     );
     setPaymentMethod(order.paymentMethod);
     setFormNotes(order.notes || "");
@@ -134,15 +148,14 @@ export default function PesananClient({
   return formItems.reduce((sum, item) => {
     const price = prices.find((p) => p.id === item.priceId);
 
-    if (!price) return sum;
+    if (!price || item.weight === "") return sum;
 
-    const rawSubtotal = (item.weight || 0) * price.price;
+    const rawSubtotal =
+      Number(item.weight) * price.price;
 
-    const subtotal = roundLaundryPrice(rawSubtotal);
-
-    return sum + subtotal;
+    return sum + roundLaundryPrice(rawSubtotal);
   }, 0);
-  }
+}
 
   async function refreshOrders() {
     const res = await fetch("/api/pesanan");
@@ -180,9 +193,7 @@ export default function PesananClient({
         );
       } else {
         const validItems = formItems
-  .filter(
-    (i) => i.priceId && i.weight !== "" && i.weight > 0
-  )
+  .filter((i) => i.priceId && Number(i.weight) > 0)
   .map((i) => ({
     ...i,
     weight: Number(i.weight),
@@ -314,9 +325,10 @@ export default function PesananClient({
                   {formItems.map((item, idx) => {
                     const selectedPrice = prices.find((p) => p.id === item.priceId);
 
-                    const rawSubtotal = selectedPrice
-                    ? (item.weight || 0) * selectedPrice.price
-                    : 0;
+                    const rawSubtotal =
+  selectedPrice && item.weight !== ""
+    ? Number(item.weight) * selectedPrice.price
+    : 0;
 
                     const subtotal = roundLaundryPrice(rawSubtotal);
                     return (
@@ -332,7 +344,7 @@ export default function PesananClient({
       i === idx
         ? {
             ...fi,
-            weight: value === "" ? "" : Number(value),
+            priceId: value,
           }
         : fi
     )
@@ -348,21 +360,26 @@ export default function PesananClient({
                         </select>
                         <div className="flex items-center gap-1">
                           <input
-                            type="number"
-                            className="input w-20 bg-white"
-                            value={item.weight}
-                            min={0.1}
-                            step={0.1}
-                            onChange={(e) =>
-                              setFormItems((prev) =>
-                                prev.map((fi, i) =>
-                                  i === idx
-                                    ? { ...fi, weight: parseFloat(e.target.value) || 0 }
-                                    : fi
-                                )
-                              )
-                            }
-                            disabled={!!editOrder}
+  type="number"
+  className="input w-20 bg-white"
+  value={item.weight}
+  min="0.1"
+  step="0.1"
+  onChange={(e) => {
+    const value = e.target.value;
+
+    setFormItems((prev) =>
+      prev.map((fi, i) =>
+        i === idx
+          ? {
+              ...fi,
+              weight: value,
+            }
+          : fi
+      )
+    );
+  }}
+  disabled={!!editOrder}
                           />
                           <span className="text-xs text-gray-400">
                             {selectedPrice?.unit || "kg"}
@@ -391,9 +408,13 @@ export default function PesananClient({
                     type="button"
                     onClick={() =>
                       setFormItems((prev) => [
-                        ...prev,
-                        { priceId: prices[0]?.id || "", weight: 1, notes: "" },
-                      ])
+  ...prev,
+  {
+    priceId: prices[0]?.id || "",
+    weight: "1",
+    notes: "",
+  },
+])
                     }
                     className="mt-2 text-sm text-primary-600 hover:underline flex items-center gap-1"
                   >
