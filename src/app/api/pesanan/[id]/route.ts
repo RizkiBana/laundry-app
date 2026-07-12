@@ -47,6 +47,7 @@ export async function PATCH(
       "DICUCI",
       "DIKERINGKAN",
       "DISETRIKA",
+      "DILIPAT",
       "SIAP_DIAMBIL",
       "SELESAI",
     ];
