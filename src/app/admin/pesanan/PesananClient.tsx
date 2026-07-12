@@ -126,20 +126,9 @@ export default function PesananClient({
     setShowForm(true);
   }
 
-  function roundLaundryWeight(weight: number) {
-  const decimal = weight % 1;
-  const integer = Math.floor(weight);
-
-  if (decimal === 0) {
-    return integer;
+  function roundLaundryPrice(amount: number) {
+  return Math.round(amount / 500) * 500;
   }
-
-  if (decimal <= 0.5) {
-    return integer + 0.5;
-  }
-
-  return integer + 1;
-}
 
   function calcTotal() {
   return formItems.reduce((sum, item) => {
@@ -147,12 +136,12 @@ export default function PesananClient({
 
     if (!price) return sum;
 
-    const roundedWeight = roundLaundryWeight(item.weight || 0);
+    const rawSubtotal = (item.weight || 0) * price.price;
 
-    const subtotal = roundedWeight * price.price;
+    const subtotal = roundLaundryPrice(rawSubtotal);
 
     return sum + subtotal;
-    }, 0);
+  }, 0);
   }
 
   async function refreshOrders() {
@@ -317,11 +306,12 @@ export default function PesananClient({
                 <div className="space-y-2">
                   {formItems.map((item, idx) => {
                     const selectedPrice = prices.find((p) => p.id === item.priceId);
-                    const roundedWeight = roundLaundryWeight(item.weight || 0);
 
-                    const subtotal = selectedPrice
-                    ? roundedWeight * selectedPrice.price
+                    const rawSubtotal = selectedPrice
+                    ? (item.weight || 0) * selectedPrice.price
                     : 0;
+
+                    const subtotal = roundLaundryPrice(rawSubtotal);
                     return (
                       <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg">
                         <select
@@ -518,7 +508,7 @@ export default function PesananClient({
                       <p key={item.id} className="text-xs">
                         {item.price.name}{" "}
                         <span className="text-gray-400">
-                          ({roundLaundryWeight(item.weight)} {item.price.unit})
+                          ({item.weight} {item.price.unit})
                         </span>
                       </p>
                     ))}
