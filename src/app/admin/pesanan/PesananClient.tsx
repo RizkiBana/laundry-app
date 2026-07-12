@@ -150,8 +150,7 @@ export default function PesananClient({
 
     if (!price || item.weight === "") return sum;
 
-    const rawSubtotal =
-      Number(item.weight) * price.price;
+    const rawSubtotal = Number(item.weight || 0) * price.price;
 
     return sum + roundLaundryPrice(rawSubtotal);
   }, 0);
@@ -325,10 +324,9 @@ export default function PesananClient({
                   {formItems.map((item, idx) => {
                     const selectedPrice = prices.find((p) => p.id === item.priceId);
 
-                    const rawSubtotal =
-  selectedPrice && item.weight !== ""
-    ? Number(item.weight) * selectedPrice.price
-    : 0;
+                    const rawSubtotal = selectedPrice
+  ? Number(item.weight || 0) * selectedPrice.price
+  : 0;
 
                     const subtotal = roundLaundryPrice(rawSubtotal);
                     return (
@@ -363,24 +361,21 @@ export default function PesananClient({
   type="number"
   className="input w-20 bg-white"
   value={item.weight}
-  min="0.1"
-  step="0.1"
+  min={0}
+  step="any"
   onChange={(e) => {
     const value = e.target.value;
 
     setFormItems((prev) =>
       prev.map((fi, i) =>
         i === idx
-          ? {
-              ...fi,
-              weight: value,
-            }
+          ? { ...fi, weight: value }
           : fi
       )
     );
   }}
   disabled={!!editOrder}
-                          />
+/>
                           <span className="text-xs text-gray-400">
                             {selectedPrice?.unit || "kg"}
                           </span>
