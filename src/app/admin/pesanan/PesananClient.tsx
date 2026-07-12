@@ -59,6 +59,7 @@ const ORDER_STATUSES = [
   { value: "DICUCI", label: "Sedang Dicuci" },
   { value: "DIKERINGKAN", label: "Sedang Dikeringkan" },
   { value: "DISETRIKA", label: "Sedang Disetrika" },
+  { value: "DILIPAT", label: "Sedang Dilipat" },
   { value: "SIAP_DIAMBIL", label: "Siap Diambil" },
   { value: "SELESAI", label: "Selesai" },
 ];

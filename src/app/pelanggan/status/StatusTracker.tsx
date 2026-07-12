@@ -7,6 +7,7 @@ const STEPS = [
   { status: "DICUCI", label: "Dicuci" },
   { status: "DIKERINGKAN", label: "Dikeringkan" },
   { status: "DISETRIKA", label: "Disetrika" },
+  { status: "DILIPAT", label: "Sedang Dilipat" },
   { status: "SIAP_DIAMBIL", label: "Siap Diambil" },
   { status: "SELESAI", label: "Selesai" },
 ];
