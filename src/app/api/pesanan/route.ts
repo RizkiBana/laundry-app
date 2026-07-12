@@ -3,17 +3,36 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { generateOrderNumber } from "@/lib/utils";
 
+function roundLaundryWeight(weight: number) {
+  const decimal = weight % 1;
+  const integer = Math.floor(weight);
+
+  if (decimal === 0) {
+    return integer;
+  }
+
+  if (decimal <= 0.5) {
+    return integer + 0.5;
+  }
+
+  return integer + 1;
+}
+
 export async function GET(request: NextRequest) {
   const session = await requireAuth();
+
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
   }
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
 
-  // Pelanggan hanya bisa lihat semua pesanan (shared account)
   const where: Record<string, unknown> = {};
+
   if (status) {
     where.status = status;
   }
@@ -21,9 +40,15 @@ export async function GET(request: NextRequest) {
   const orders = await prisma.order.findMany({
     where,
     include: {
-      items: { include: { price: true } },
+      items: {
+        include: {
+          price: true,
+        },
+      },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   return NextResponse.json(orders);
@@ -31,11 +56,16 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const session = await requireAuth(["ADMIN"]);
+
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401 }
+    );
   }
 
   const body = await request.json();
+
   const {
     customerName,
     customerPhone,
@@ -64,22 +94,29 @@ export async function POST(request: NextRequest) {
   const orderItems = [];
 
   for (const item of items) {
-  const price = await prisma.laundryPrice.findUnique({
-    where: { id: item.priceId },
-  });
+    const price = await prisma.laundryPrice.findUnique({
+      where: {
+        id: item.priceId,
+      },
+    });
 
-  if (!price) continue;
+    if (!price) continue;
 
-  // Hitung subtotal lalu bulatkan ke bawah per Rp1.000
-  const subtotal = Math.floor((price.price * item.weight) / 1000) * 1000;
+    // Pembulatan berat laundry
+    // Contoh:
+    // 3.21 => 3.5
+    // 3.57 => 4
+    const roundedWeight = roundLaundryWeight(item.weight);
 
-  totalAmount += subtotal;
+    const subtotal = roundedWeight * price.price;
 
-  orderItems.push({
-    priceId: item.priceId,
-    weight: item.weight,
-    subtotal,
-    notes: item.notes || null,
+    totalAmount += subtotal;
+
+    orderItems.push({
+      priceId: item.priceId,
+      weight: item.weight,
+      subtotal,
+      notes: item.notes || null,
     });
   }
 
@@ -92,11 +129,19 @@ export async function POST(request: NextRequest) {
       totalAmount,
       notes: notes || null,
       paymentMethod: paymentMethod || "TUNAI",
-      estimasiSelesai: estimasiSelesai ? new Date(estimasiSelesai) : null,
-      items: { create: orderItems },
+      estimasiSelesai: estimasiSelesai
+        ? new Date(estimasiSelesai)
+        : null,
+      items: {
+        create: orderItems,
+      },
     },
     include: {
-      items: { include: { price: true } },
+      items: {
+        include: {
+          price: true,
+        },
+      },
     },
   });
 

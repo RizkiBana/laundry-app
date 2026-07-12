@@ -126,14 +126,30 @@ export default function PesananClient({
     setShowForm(true);
   }
 
+  function roundLaundryWeight(weight: number) {
+  const decimal = weight % 1;
+  const integer = Math.floor(weight);
+
+  if (decimal === 0) {
+    return integer;
+  }
+
+  if (decimal <= 0.5) {
+    return integer + 0.5;
+  }
+
+  return integer + 1;
+}
+
   function calcTotal() {
   return formItems.reduce((sum, item) => {
     const price = prices.find((p) => p.id === item.priceId);
 
     if (!price) return sum;
 
-    const subtotal =
-      Math.floor((price.price * (item.weight || 0)) / 1000) * 1000;
+    const roundedWeight = roundLaundryWeight(item.weight || 0);
+
+    const subtotal = roundedWeight * price.price;
 
     return sum + subtotal;
     }, 0);
@@ -301,8 +317,10 @@ export default function PesananClient({
                 <div className="space-y-2">
                   {formItems.map((item, idx) => {
                     const selectedPrice = prices.find((p) => p.id === item.priceId);
+                    const roundedWeight = roundLaundryWeight(item.weight || 0);
+
                     const subtotal = selectedPrice
-                    ? Math.floor((selectedPrice.price * (item.weight || 0)) / 1000) * 1000
+                    ? roundedWeight * selectedPrice.price
                     : 0;
                     return (
                       <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg">
@@ -500,7 +518,7 @@ export default function PesananClient({
                       <p key={item.id} className="text-xs">
                         {item.price.name}{" "}
                         <span className="text-gray-400">
-                          ({item.weight} {item.price.unit})
+                          ({roundLaundryWeight(item.weight)} {item.price.unit})
                         </span>
                       </p>
                     ))}
