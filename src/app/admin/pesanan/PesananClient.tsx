@@ -127,9 +127,15 @@ export default function PesananClient({
   }
 
   function calcTotal() {
-    return formItems.reduce((sum, item) => {
-      const price = prices.find((p) => p.id === item.priceId);
-      return sum + (price ? price.price * (item.weight || 0) : 0);
+  return formItems.reduce((sum, item) => {
+    const price = prices.find((p) => p.id === item.priceId);
+
+    if (!price) return sum;
+
+    const subtotal =
+      Math.floor((price.price * (item.weight || 0)) / 1000) * 1000;
+
+    return sum + subtotal;
     }, 0);
   }
 
@@ -296,8 +302,8 @@ export default function PesananClient({
                   {formItems.map((item, idx) => {
                     const selectedPrice = prices.find((p) => p.id === item.priceId);
                     const subtotal = selectedPrice
-                      ? selectedPrice.price * (item.weight || 0)
-                      : 0;
+                    ? Math.floor((selectedPrice.price * (item.weight || 0)) / 1000) * 1000
+                    : 0;
                     return (
                       <div key={idx} className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg">
                         <select

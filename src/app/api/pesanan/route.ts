@@ -64,18 +64,22 @@ export async function POST(request: NextRequest) {
   const orderItems = [];
 
   for (const item of items) {
-    const price = await prisma.laundryPrice.findUnique({
-      where: { id: item.priceId },
-    });
-    if (!price) continue;
+  const price = await prisma.laundryPrice.findUnique({
+    where: { id: item.priceId },
+  });
 
-    const subtotal = price.price * item.weight;
-    totalAmount += subtotal;
-    orderItems.push({
-      priceId: item.priceId,
-      weight: item.weight,
-      subtotal,
-      notes: item.notes || null,
+  if (!price) continue;
+
+  // Hitung subtotal lalu bulatkan ke bawah per Rp1.000
+  const subtotal = Math.floor((price.price * item.weight) / 1000) * 1000;
+
+  totalAmount += subtotal;
+
+  orderItems.push({
+    priceId: item.priceId,
+    weight: item.weight,
+    subtotal,
+    notes: item.notes || null,
     });
   }
 
