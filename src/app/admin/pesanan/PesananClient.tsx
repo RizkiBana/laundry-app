@@ -50,7 +50,7 @@ interface Order {
 
 interface FormItem {
   priceId: string;
-  weight: number;
+  weight: number | "";
   notes: string;
 }
 
@@ -179,7 +179,14 @@ export default function PesananClient({
           prev.map((o) => (o.id === editOrder.id ? updated : o))
         );
       } else {
-        const validItems = formItems.filter((i) => i.priceId && i.weight > 0);
+        const validItems = formItems
+  .filter(
+    (i) => i.priceId && i.weight !== "" && i.weight > 0
+  )
+  .map((i) => ({
+    ...i,
+    weight: Number(i.weight),
+  }));
         if (validItems.length === 0) {
           alert("Tambahkan minimal 1 layanan dengan berat > 0");
           setLoading(false);
@@ -317,13 +324,20 @@ export default function PesananClient({
                         <select
                           className="input flex-1 bg-white"
                           value={item.priceId}
-                          onChange={(e) =>
-                            setFormItems((prev) =>
-                              prev.map((fi, i) =>
-                                i === idx ? { ...fi, priceId: e.target.value } : fi
-                              )
-                            )
-                          }
+                          onChange={(e) => {
+  const value = e.target.value;
+
+  setFormItems((prev) =>
+    prev.map((fi, i) =>
+      i === idx
+        ? {
+            ...fi,
+            weight: value === "" ? "" : Number(value),
+          }
+        : fi
+    )
+  );
+}}
                           disabled={!!editOrder}
                         >
                           {prices.map((p) => (
