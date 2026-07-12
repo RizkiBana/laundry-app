@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import { formatCurrency, formatDate, PAYMENT_METHOD_LABELS } from "@/lib/utils";
-import { TrendingUp, ShoppingBag, CreditCard, XCircle, Calendar, TrendingDown, Wallet } from "lucide-react";
+import {
+  TrendingUp,
+  ShoppingBag,
+  CreditCard,
+  XCircle,
+  Calendar,
+  TrendingDown,
+  Wallet,
+  Smartphone,
+  Banknote,
+} from "lucide-react";
 
 interface Order {
   id: string;
@@ -22,8 +32,17 @@ interface LaporanData {
   totalBelumLunas: number;
   totalPengeluaran: number;
   netProfit: number;
+
+  totalQris: number;
+  totalTunai: number;
+
   orders: Order[];
-  period: { type: string; day: number; month: number; year: number };
+  period: {
+    type: string;
+    day: number;
+    month: number;
+    year: number;
+  };
 }
 
 const MONTHS = [
@@ -59,43 +78,60 @@ export default function LaporanClient({ initialData }: { initialData: LaporanDat
   }
 
   const stats = [
-    {
-      label: "Total Pesanan",
-      value: data.totalOrders,
-      icon: ShoppingBag,
-      color: "text-blue-600 bg-blue-100",
-    },
-    {
-      label: "Total Pendapatan",
-      value: formatCurrency(data.totalRevenue),
-      icon: TrendingUp,
-      color: "text-green-600 bg-green-100",
-    },
-    {
-      label: "Total Pengeluaran",
-      value: formatCurrency(data.totalPengeluaran),
-      icon: TrendingDown,
-      color: "text-red-600 bg-red-100",
-    },
-    {
-      label: "Laba Bersih",
-      value: formatCurrency(data.netProfit),
-      icon: Wallet,
-      color: data.netProfit >= 0 ? "text-emerald-600 bg-emerald-100" : "text-red-600 bg-red-100",
-    },
-    {
-      label: "Transaksi Lunas",
-      value: data.totalLunas,
-      icon: CreditCard,
-      color: "text-purple-600 bg-purple-100",
-    },
-    {
-      label: "Belum Lunas",
-      value: data.totalBelumLunas,
-      icon: XCircle,
-      color: "text-red-600 bg-red-100",
-    },
-  ];
+  {
+    label: "Total Pesanan",
+    value: data.totalOrders,
+    icon: ShoppingBag,
+    color: "text-blue-600 bg-blue-100",
+  },
+  {
+    label: "Total Pendapatan",
+    value: formatCurrency(data.totalRevenue),
+    icon: TrendingUp,
+    color: "text-green-600 bg-green-100",
+  },
+  {
+    label: "Total Pengeluaran",
+    value: formatCurrency(data.totalPengeluaran),
+    icon: TrendingDown,
+    color: "text-red-600 bg-red-100",
+  },
+  {
+    label: "Laba Bersih",
+    value: formatCurrency(data.netProfit),
+    icon: Wallet,
+    color:
+      data.netProfit >= 0
+        ? "text-emerald-600 bg-emerald-100"
+        : "text-red-600 bg-red-100",
+  },
+
+  {
+    label: "Pendapatan QRIS",
+    value: formatCurrency(data.totalQris),
+    icon: Smartphone,
+    color: "text-indigo-600 bg-indigo-100",
+  },
+  {
+    label: "Pendapatan Tunai",
+    value: formatCurrency(data.totalTunai),
+    icon: Banknote,
+    color: "text-yellow-700 bg-yellow-100",
+  },
+
+  {
+    label: "Transaksi Lunas",
+    value: data.totalLunas,
+    icon: CreditCard,
+    color: "text-purple-600 bg-purple-100",
+  },
+  {
+    label: "Belum Lunas",
+    value: data.totalBelumLunas,
+    icon: XCircle,
+    color: "text-red-600 bg-red-100",
+  },
+];
 
   return (
     <div>
