@@ -13,7 +13,7 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       <AdminSidebar userName={session.name} />
-      <main className="ml-64 p-8 min-h-screen">{children}</main>
+      <main className="md:ml-64 p-4 md:p-8 min-h-screen">{children}</main>
     </div>
   );
 }

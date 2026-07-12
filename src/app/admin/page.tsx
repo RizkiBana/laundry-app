@@ -86,13 +86,13 @@ export default async function AdminDashboard() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="card flex items-center gap-4">
-            <div className={`${stat.bg} p-3 rounded-xl text-white flex-shrink-0`}>
+          <div key={stat.label}className="card flex items-center gap-3 p-3 md:p-4">
+            <div className={`${stat.bg} p-2 md:p-3 rounded-xl text-white flex-shrink-0`}>
               <stat.icon className="h-6 w-6" />
             </div>
             <div>
               <p className="text-xs text-gray-500">{stat.label}</p>
-              <p className="text-xl font-bold text-gray-900">{stat.value}</p>
+              <p className="text-lg md:text-xl font-bold text-gray-900">{stat.value}</p>
             </div>
           </div>
         ))}
@@ -112,8 +112,14 @@ export default async function AdminDashboard() {
         <div className="divide-y">
           {recentOrders.map((order) => (
             <div
-              key={order.id}
-              className="flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors"
+                key={order.id}
+               className="
+                flex flex-col gap-3
+                md:flex-row md:items-center md:justify-between
+                px-4 md:px-6 py-3
+                hover:bg-gray-50 transition-colors
+                "
+
             >
               <div>
                 <p className="font-medium text-sm text-gray-900">
@@ -121,7 +127,7 @@ export default async function AdminDashboard() {
                 </p>
                 <p className="text-xs text-gray-500">{order.customerName}</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-2">
                 <StatusBadge status={order.status} />
                 <PaymentBadge status={order.paymentStatus} />
                 <p className="text-sm font-medium text-gray-700 hidden sm:block">
