@@ -259,6 +259,30 @@ export default function PesananClient({
       alert("Gagal update status");
     }
   }
+  async function handlePaymentStatusChange(
+  id: string,
+  paymentStatus: string
+) {
+  try {
+    const res = await fetch(`/api/pesanan/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ paymentStatus }),
+    });
+
+    if (res.ok) {
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === id
+            ? { ...o, paymentStatus }
+            : o
+        )
+      );
+    }
+  } catch {
+    alert("Gagal mengubah status pembayaran");
+  }
+}
 
   return (
     <div>
@@ -568,11 +592,40 @@ export default function PesananClient({
                     <p className="text-xs text-gray-400 mt-0.5">▼ klik untuk ubah</p>
                   </td>
                   <td className="px-4 py-3">
-                    <PaymentBadge status={order.paymentStatus} />
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
-                    </p>
-                  </td>
+  <div className="relative inline-block">
+    <div className="flex items-center gap-1">
+      <PaymentBadge status={order.paymentStatus} />
+
+      <select
+        value={order.paymentStatus}
+        onChange={(e) =>
+          handlePaymentStatusChange(
+            order.id,
+            e.target.value
+          )
+        }
+        className="absolute inset-0 opacity-0 w-full cursor-pointer"
+      >
+        <option value="BELUM_LUNAS">
+          Belum Lunas
+        </option>
+
+        <option value="LUNAS">
+          Lunas
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <p className="text-xs text-gray-400 mt-0.5">
+    ▼ klik untuk ubah
+  </p>
+
+  <p className="text-xs text-gray-400">
+    {PAYMENT_METHOD_LABELS[order.paymentMethod] ||
+      order.paymentMethod}
+  </p>
+</td>
                   <td className="px-4 py-3 text-xs text-gray-500">
                     {formatDate(order.createdAt)}
                     {order.estimasiSelesai && (
