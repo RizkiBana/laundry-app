@@ -621,10 +621,18 @@ export default function PesananClient({
     ▼ klik untuk ubah
   </p>
 
-  <p className="text-xs text-gray-400">
-    {PAYMENT_METHOD_LABELS[order.paymentMethod] ||
-      order.paymentMethod}
-  </p>
+  <p
+  className={`text-xs font-bold ${
+    order.paymentMethod === "QRIS"
+      ? "text-blue-600"
+      : order.paymentMethod === "TUNAI"
+      ? "text-green-600"
+      : "text-gray-700"
+  }`}
+>
+  {PAYMENT_METHOD_LABELS[order.paymentMethod] ||
+    order.paymentMethod}
+</p>
 </td>
                   <td className="px-4 py-3 text-xs text-gray-500">
                     {formatDate(order.createdAt)}
