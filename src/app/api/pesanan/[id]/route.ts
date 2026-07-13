@@ -37,7 +37,7 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await request.json();
-  const { status, customerName, customerPhone, customerAddress, notes, paymentMethod, estimasiSelesai } = body;
+  const { status, customerName, customerPhone, customerAddress, notes, paymentMethod, paymentStatus, estimasiSelesai } = body;
 
   const updateData: Record<string, unknown> = {};
 
@@ -62,10 +62,26 @@ export async function PATCH(
   if (customerAddress !== undefined) updateData.customerAddress = customerAddress;
   if (notes !== undefined) updateData.notes = notes;
   if (paymentMethod !== undefined) updateData.paymentMethod = paymentMethod;
+  if (paymentStatus !== undefined) {
+  const validPaymentStatuses = [
+    "BELUM_LUNAS",
+    "LUNAS",
+  ];
+
+  if (!validPaymentStatuses.includes(paymentStatus)) {
+    return NextResponse.json(
+      { error: "Status pembayaran tidak valid" },
+      { status: 400 }
+    );
+  }
+
+  updateData.paymentStatus = paymentStatus;
+}
   if (estimasiSelesai !== undefined) {
     updateData.estimasiSelesai = estimasiSelesai ? new Date(estimasiSelesai) : null;
   }
 
+  console.log("Update Data:", updateData);
   const order = await prisma.order.update({
     where: { id },
     data: updateData,
