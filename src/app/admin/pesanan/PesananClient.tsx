@@ -224,7 +224,6 @@ export default function PesananClient({
 
       setShowForm(false);
       resetForm();
-      router.refresh();
     } catch (err) {
       alert(err instanceof Error ? err.message : "Terjadi kesalahan");
     } finally {
