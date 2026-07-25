@@ -18,7 +18,14 @@ export async function GET(request: NextRequest) {
   }
 
   const { searchParams } = new URL(request.url);
+
+  const page = Number(searchParams.get("page") || "1");
+  const limit = Number(searchParams.get("limit") || "20");
+
+  const search = searchParams.get("search") || "";
   const status = searchParams.get("status");
+
+  const skip = (page - 1) * limit;
 
   const where: Record<string, unknown> = {};
 
@@ -26,21 +33,58 @@ export async function GET(request: NextRequest) {
     where.status = status;
   }
 
-  const orders = await prisma.order.findMany({
-    where,
-    include: {
-      items: {
-        include: {
-          price: true,
+  if (search) {
+    where.OR = [
+      {
+        customerName: {
+          contains: search,
+          mode: "insensitive",
         },
       },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+      {
+        orderNumber: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+      {
+        customerPhone: {
+          contains: search,
+          mode: "insensitive",
+        },
+      },
+    ];
+  }
 
-  return NextResponse.json(orders);
+  const [orders, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        items: {
+          include: {
+            price: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    }),
+
+    prisma.order.count({
+      where,
+    }),
+  ]);
+
+  return NextResponse.json({
+    orders,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -79,42 +123,42 @@ export async function POST(request: NextRequest) {
     );
   }
 
- const priceIds = items.map((item: { priceId: string }) => item.priceId);
+  const priceIds = items.map((item: { priceId: string }) => item.priceId);
 
-const prices = await prisma.laundryPrice.findMany({
-  where: {
-    id: {
-      in: priceIds,
+  const prices = await prisma.laundryPrice.findMany({
+    where: {
+      id: {
+        in: priceIds,
+      },
     },
-  },
-});
-
-const priceMap = new Map(
-  prices.map((price) => [price.id, price])
-);
-
-let totalAmount = 0;
-
-const orderItems = [];
-
-for (const item of items) {
-  const price = priceMap.get(item.priceId);
-
-  if (!price) continue;
-
-  const rawSubtotal = item.weight * price.price;
-
-  const subtotal = roundLaundryPrice(rawSubtotal);
-
-  totalAmount += subtotal;
-
-  orderItems.push({
-    priceId: item.priceId,
-    weight: item.weight,
-    subtotal,
-    notes: item.notes || null,
   });
-}
+
+  const priceMap = new Map(
+    prices.map((price) => [price.id, price])
+  );
+
+  let totalAmount = 0;
+
+  const orderItems = [];
+
+  for (const item of items) {
+    const price = priceMap.get(item.priceId);
+
+    if (!price) continue;
+
+    const rawSubtotal = item.weight * price.price;
+
+    const subtotal = roundLaundryPrice(rawSubtotal);
+
+    totalAmount += subtotal;
+
+    orderItems.push({
+      priceId: item.priceId,
+      weight: item.weight,
+      subtotal,
+      notes: item.notes || null,
+    });
+  }
 
   const order = await prisma.order.create({
     data: {

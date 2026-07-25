@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
   formatCurrency,
@@ -72,7 +72,12 @@ export default function PesananClient({
   prices: Price[];
 }) {
   const router = useRouter();
+  const priceMap = useMemo(() => {
+  return new Map(prices.map((price) => [price.id, price]));
+}, [prices]);
   const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(false);
@@ -146,7 +151,7 @@ export default function PesananClient({
 
   function calcTotal() {
   return formItems.reduce((sum, item) => {
-    const price = prices.find((p) => p.id === item.priceId);
+    const price = priceMap.get(item.priceId)
 
     if (!price || item.weight === "") return sum;
 
@@ -156,13 +161,17 @@ export default function PesananClient({
   }, 0);
 }
 
-  async function refreshOrders() {
-    const res = await fetch("/api/pesanan");
-    if (res.ok) {
-      const data = await res.json();
-      setOrders(data);
-    }
-  }
+  async function refreshOrders(currentPage = page) {
+  const res = await fetch(`/api/pesanan?page=${currentPage}&limit=20`);
+
+  if (!res.ok) return;
+
+  const data = await res.json();
+
+  setOrders(data.orders);
+  setPage(data.page);
+  setTotalPages(data.totalPages);
+ }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -345,7 +354,7 @@ export default function PesananClient({
                 <label className="label">Layanan Laundry</label>
                 <div className="space-y-2">
                   {formItems.map((item, idx) => {
-                    const selectedPrice = prices.find((p) => p.id === item.priceId);
+                    const selectedPrice = priceMap.get(item.priceId)
 
                     const rawSubtotal = selectedPrice
   ? Number(item.weight || 0) * selectedPrice.price
