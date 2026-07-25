@@ -25,8 +25,15 @@ export default async function AdminDashboard() {
     prisma.order.count({
       where: {
         status: {
-          in: ["DITERIMA", "DICUCI", "DIKERINGKAN", "DISETRIKA", "SIAP_DIAMBIL"],
-        },
+    in: [
+    "DITERIMA",
+    "DICUCI",
+    "DIKERINGKAN",
+    "DISETRIKA",
+    "DILIPAT",
+    "SIAP_DIAMBIL",
+    ],
+    }
       },
     }),
     prisma.order.aggregate({
@@ -37,9 +44,18 @@ export default async function AdminDashboard() {
       _sum: { totalAmount: true },
     }),
     prisma.order.findMany({
-      take: 8,
-      orderBy: { createdAt: "desc" },
-    }),
+  take: 8,
+  orderBy: { createdAt: "desc" },
+  select: {
+    id: true,
+    orderNumber: true,
+    customerName: true,
+    status: true,
+    paymentStatus: true,
+    totalAmount: true,
+    createdAt: true,
+  },
+})
   ]);
 
   const stats = [

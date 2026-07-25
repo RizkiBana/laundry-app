@@ -79,15 +79,26 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  let totalAmount = 0;
-  const orderItems = [];
+ const priceIds = items.map((item: { priceId: string }) => item.priceId);
 
-  for (const item of items) {
-  const price = await prisma.laundryPrice.findUnique({
-    where: {
-      id: item.priceId,
+const prices = await prisma.laundryPrice.findMany({
+  where: {
+    id: {
+      in: priceIds,
     },
-  });
+  },
+});
+
+const priceMap = new Map(
+  prices.map((price) => [price.id, price])
+);
+
+let totalAmount = 0;
+
+const orderItems = [];
+
+for (const item of items) {
+  const price = priceMap.get(item.priceId);
 
   if (!price) continue;
 
@@ -102,8 +113,8 @@ export async function POST(request: NextRequest) {
     weight: item.weight,
     subtotal,
     notes: item.notes || null,
-    });
-  }
+  });
+}
 
   const order = await prisma.order.create({
     data: {
