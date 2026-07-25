@@ -67,17 +67,21 @@ const ORDER_STATUSES = [
 export default function PesananClient({
   initialOrders,
   prices,
+  initialPage,
+  initialTotalPages,
 }: {
   initialOrders: Order[];
   prices: Price[];
+  initialPage: number;
+  initialTotalPages: number;
 }) {
   const router = useRouter();
   const priceMap = useMemo(() => {
   return new Map(prices.map((price) => [price.id, price]));
 }, [prices]);
   const [orders, setOrders] = useState<Order[]>(initialOrders);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [page, setPage] = useState(initialPage);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [showForm, setShowForm] = useState(false);
   const [editOrder, setEditOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(false);

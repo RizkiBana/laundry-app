@@ -6,7 +6,7 @@ export const revalidate = 0;
 const PAGE_SIZE = 20;
 
 export default async function PesananPage() {
-  const [orders, prices] = await Promise.all([
+  const [orders, prices, totalOrders] = await Promise.all([
     prisma.order.findMany({
       take: PAGE_SIZE,
       orderBy: {
@@ -27,13 +27,13 @@ export default async function PesananPage() {
         createdAt: true,
         updatedAt: true,
         items: {
-  select: {
-    id: true,
-    priceId: true,
-    weight: true,
-    subtotal: true,
-    notes: true,
-    price: {
+          select: {
+            id: true,
+            priceId: true,
+            weight: true,
+            subtotal: true,
+            notes: true,
+            price: {
               select: {
                 id: true,
                 name: true,
@@ -58,6 +58,8 @@ export default async function PesananPage() {
         name: "asc",
       },
     }),
+
+    prisma.order.count(),
   ]);
 
   return (
@@ -81,6 +83,8 @@ export default async function PesananPage() {
         createdAt: p.createdAt.toISOString(),
         updatedAt: p.updatedAt.toISOString(),
       }))}
+      initialPage={1}
+      initialTotalPages={Math.ceil(totalOrders / PAGE_SIZE)}
     />
   );
 }

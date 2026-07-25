@@ -76,6 +76,8 @@ model Order {
    @@index([createdAt])
    @@index([status])
    @@index([paymentStatus])
+   @@index([customerName])
+   @@index([orderNumber])
 }
 
 model OrderItem {
