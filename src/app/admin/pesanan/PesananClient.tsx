@@ -229,10 +229,19 @@ export default function PesananClient({
           }),
         });
         if (!res.ok) {
-          const err = await res.json();
-          throw new Error(err.error || "Gagal buat pesanan");
-        }
-        await refreshOrders();
+  const err = await res.json();
+  throw new Error(err.error || "Gagal buat pesanan");
+}
+
+const newOrder = await res.json();
+
+setOrders((prev) => [
+  newOrder,
+  ...prev.slice(0, 19),
+]);
+
+resetForm();
+setShowForm(false);
       }
 
       setShowForm(false);
