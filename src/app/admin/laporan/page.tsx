@@ -28,16 +28,31 @@ export default async function LaporanPage() {
     totalQris,
   ] = await Promise.all([
     prisma.order.findMany({
-      where: {
-        createdAt: {
-          gte: startOfMonth,
-          lte: endOfMonth,
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
+  where: {
+    createdAt: {
+      gte: startOfMonth,
+      lte: endOfMonth,
+    },
+  },
+  orderBy: {
+    createdAt: "desc",
+  },
+
+  take: 100,
+
+  select: {
+    id: true,
+    orderNumber: true,
+    customerName: true,
+    totalAmount: true,
+    paymentStatus: true,
+    paymentMethod: true,
+    status: true,
+    createdAt: true,
+    updatedAt: true,
+    estimasiSelesai: true,
+  },
+}),
 
     prisma.order.aggregate({
       where: {
